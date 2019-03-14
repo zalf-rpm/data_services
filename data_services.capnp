@@ -1,3 +1,4 @@
+@0xd3f8859c7688b76b;
 
 struct ADate {
   # A standard Gregorian calendar date.
@@ -24,15 +25,16 @@ struct SoilDataServiceInfo {
 }
 
 interface SoilDataService {
-  
-  getSoilIdAt @0 (gkCoord :GKCoord) :Int64;
+  getSoilIdAt @0 (gkCoord :GKCoord) -> (soilId :Int64);
 }
 
 interface DataServices {
   # the bootstrap interface to the different data services
 
-  getAvailableSoilDataServices @0 () :List(SoilDataServiceInfo);
-  getSoilDataService @1 (id :UInt64) :SoilDataService;
-  
+  getAvailableSoilDataServices @0 () -> (availableSoilDataServices :List(SoilDataServiceInfo));
+  getSoilDataService @1 (id :UInt64) -> (soilDataService :SoilDataService);
+  getCoord @2 () -> (coord :GKCoord);
+  getText @3 () -> (text :Text);
+
   #landkreisId @1 (gkCoord :GKCoord) :Int64;
 }

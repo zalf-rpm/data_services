@@ -48,7 +48,7 @@ def create_ascii_grid_interpolator(arr, meta, ignore_nodata=True):
 
     return NearestNDInterpolator(np.array(points), np.array(values))
 
-class SoilDataService(data_services_capnp.SoilDataService):
+class SoilDataService(data_services_capnp.SoilDataService.Server):
     "Implementation of SoilDataService Cap'n Proto interface."
 
     def __init__(self, path_to_soil_grid):
@@ -56,27 +56,35 @@ class SoilDataService(data_services_capnp.SoilDataService):
         soil_metadata, _ = read_header(path_to_soil_grid)
         soil_grid = np.loadtxt(path_to_soil_grid, dtype=int, skiprows=6)
         self.soil_gk5_interpolate = create_ascii_grid_interpolator(soil_grid, soil_metadata)
-        print "read: ", path_to_soil_grid
+        print("read: ", path_to_soil_grid)
 
-    def getSoilIdAt(self, gkCoord):
-        print("soilId")
+    def getSoilIdAt(self, gkCoord, _context, **kwargs):
+        return 5
 
 
-class DataServicesImpl(data_services_capnp.DataServices):
+class DataServicesImpl(data_services_capnp.DataServices.Server):
     "Implementation of the DataServices Cap'n Proto interface."
 
     def __init__(self, path_to_data_dir):
+        #pass
         self.soil_data_service_instance = SoilDataService(path_to_data_dir + "germany/buek1000_1000_gk5.asc")
 
-    def getAvailableSoilDataServices(self): 
+    def getAvailableSoilDataServices(self, _context, **kwargs): 
         msg = data_services_capnp.SoilDataServiceInfo.new_message()
         msg.id = 1
         msg.name = "BUEK1000"
         msg.service = self.soil_data_service_instance
         return [msg]
     
-    def getSoilDataService(self, id): 
+    def getSoilDataService(self, id, _context, **kwargs): 
         return self.soil_data_service_instance
+
+    def getCoord(self, _context, **kwargs):
+        #coord = data_services_capnp.GKCoord.new_message(meridianNo=5, r=1, h=2)
+        return {"meridianNo": 5, "r": 1, "h": 2} 
+
+    def getText(self, _context, **kwargs):
+        return "bla"
 
     #def evaluate(self, expression, _context, **kwargs):
     #    return evaluate_impl(expression).then(lambda value: setattr(_context.results, 'value', ValueImpl(value)))
@@ -92,7 +100,7 @@ class DataServicesImpl(data_services_capnp.DataServices):
 def main():
     #address = parse_args().address
 
-    server = capnp.TwoPartyServer("*:8000", bootstrap=DataServicesImpl("A:/data/"))
+    server = capnp.TwoPartyServer("*:8000", bootstrap=DataServicesImpl("/home/berg/archive/data/"))
     server.run_forever()
 
 if __name__ == '__main__':
