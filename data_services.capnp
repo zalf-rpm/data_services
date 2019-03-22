@@ -1,21 +1,7 @@
 @0xd3f8859c7688b76b;
 
-struct ADate {
-  # A standard Gregorian calendar date.
-
-  year @0 :Int16;
-  # The year. Must include the century.
-  # Negative value indicates BC.
-
-  month @1 :UInt8;   # Month number, 1-12.
-  day @2 :UInt8;     # Day number, 1-31.
-}
-
-struct GKCoord {
-  meridianNo @0 :UInt8;
-  r @1 :Int64; # right value
-  h @2 :Int64; # height value
-}
+using Date = import "date.capnp".Date;
+using Geo = import "geo_coord.capnp".Geo;
 
 struct SoilDataServiceInfo {
   id @0 :UInt64;
@@ -25,7 +11,7 @@ struct SoilDataServiceInfo {
 }
 
 interface SoilDataService {
-  getSoilIdAt @0 (gkCoord :GKCoord) -> (soilId :Int64);
+  getSoilIdAt @0 (gkCoord :Geo.GKCoord) -> (soilId :Int64);
 }
 
 interface DataServices {
@@ -33,7 +19,7 @@ interface DataServices {
 
   getAvailableSoilDataServices @0 () -> (availableSoilDataServices :List(SoilDataServiceInfo));
   getSoilDataService @1 (id :UInt64) -> (soilDataService :SoilDataService);
-  getCoord @2 () -> (coord :GKCoord);
+  getCoord @2 () -> (coord :Geo.GKCoord);
   getText @3 () -> (text :Text);
 
   #landkreisId @1 (gkCoord :GKCoord) :Int64;
